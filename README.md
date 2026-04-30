@@ -1,5 +1,6 @@
 # syukkinn-
 出勤日管理アプリ
+takemototosou
 export default function WorkCalendarApp() {
   const shareToLine = () => {
     const text = `【今月の出勤】
