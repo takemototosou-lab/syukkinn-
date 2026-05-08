@@ -259,7 +259,7 @@
       .mark-grid,
       .invoice-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 8px;
       }
 
@@ -286,12 +286,6 @@
       .choice-button.active.half {
         border-color: #d97706;
         background: #f59e0b;
-        color: #ffffff;
-      }
-
-      .choice-button.active.off {
-        border-color: #dc2626;
-        background: #ef4444;
         color: #ffffff;
       }
 
@@ -327,11 +321,19 @@
       }
 
       .save-button {
-        background: #111827;
+        background: #2563eb;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
       }
 
       .save-button.saved {
         background: #16a34a;
+        box-shadow: 0 8px 18px rgba(22, 163, 74, 0.28);
+      }
+
+      .save-button.saving {
+        background: #f59e0b;
+        box-shadow: 0 8px 18px rgba(245, 158, 11, 0.28);
+        transform: scale(0.98);
       }
 
       .line-button {
@@ -515,7 +517,6 @@
               <div class="mark-grid">
                 <button class="choice-button" id="markWork" type="button">○</button>
                 <button class="choice-button" id="markHalf" type="button">△</button>
-                <button class="choice-button" id="markOff" type="button">×</button>
               </div>
             </div>
 
@@ -683,35 +684,47 @@
         if (site) site.textContent = data.site || "";
 
         cell.classList.add("saved");
-        cell.classList.remove("selected");
+        cell.classList.add("selected");
         requestAnimationFrame(() => {
           cell.scrollIntoView({ behavior: "smooth", block: "center" });
         });
       }
 
       function saveSelectedDay() {
+        const saveButtonBefore = document.querySelector("#saveButton");
+        if (saveButtonBefore) {
+          saveButtonBefore.textContent = "保存中...";
+          saveButtonBefore.classList.remove("saved");
+          saveButtonBefore.classList.add("saving");
+        }
+
         const siteInput = document.querySelector("#siteInput");
         const priceInput = document.querySelector("#priceInput");
-        const next = {
-          ...(draft || getSelectedData()),
-          site: (siteInput ? siteInput.value : draft.site).trim(),
-          price: priceInput ? Number(priceInput.value || 0) : Number(draft.price || 0),
+        const currentDraft = draft || getSelectedData();
+        const draftData = {
+          ...currentDraft,
+          site: (siteInput ? siteInput.value : currentDraft.site).trim(),
+          price: priceInput ? Number(priceInput.value || 0) : Number(currentDraft.price || 0),
         };
 
-        draft = { ...next };
-        workData[selectedDay] = { ...draft };
+        draft = { ...draftData };
+        workData[selectedDay] = { ...draftData };
         justSavedDay = selectedDay;
-        rememberSite(next.site);
+        rememberSite(draftData.site);
         saveMonthData();
-        renderInputPage();
+        renderCalendar();
+        updateCalendarCell(selectedDay, draftData);
+        renderSavedBanner();
+        renderInputForm();
+        renderSiteHistory();
 
         const saveButton = document.querySelector("#saveButton");
         saveButton.textContent = "決定済み";
+        saveButton.classList.remove("saving");
         saveButton.classList.add("saved");
 
         const savedCell = document.querySelector(`.day-button[data-day="${selectedDay}"]`);
         if (savedCell) {
-          updateCalendarCell(selectedDay, draft);
           savedCell.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
@@ -938,10 +951,10 @@
 
         document.querySelector("#markWork").className = `choice-button ${data.mark === "○" ? "active work" : ""}`;
         document.querySelector("#markHalf").className = `choice-button ${data.mark === "△" ? "active half" : ""}`;
-        document.querySelector("#markOff").className = `choice-button ${data.mark === "×" ? "active off" : ""}`;
         document.querySelector("#invoiceOn").className = `choice-button ${data.invoice ? "active invoice-on" : ""}`;
         document.querySelector("#invoiceOff").className = `choice-button ${!data.invoice ? "active invoice-off" : ""}`;
         document.querySelector("#saveButton").textContent = justSavedDay ? "決定済み" : "決定";
+        document.querySelector("#saveButton").classList.remove("saving");
         document.querySelector("#saveButton").classList.toggle("saved", Boolean(justSavedDay));
       }
 
@@ -1067,7 +1080,6 @@
 
       document.querySelector("#markWork").addEventListener("click", () => setDraft("mark", "○"));
       document.querySelector("#markHalf").addEventListener("click", () => setDraft("mark", "△"));
-      document.querySelector("#markOff").addEventListener("click", () => setDraft("mark", "×"));
       document.querySelector("#invoiceOn").addEventListener("click", () => setDraft("invoice", true));
       document.querySelector("#invoiceOff").addEventListener("click", () => setDraft("invoice", false));
       document.querySelector("#saveButton").addEventListener("click", saveSelectedDay);
