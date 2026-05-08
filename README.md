@@ -1,108 +1,11 @@
-# syukkinn-
-出勤日管理アプリ
-takemototosou
-export default function WorkCalendarApp() {
-  const shareToLine = () => {
-    const text = `【今月の出勤】
-○ 18日
-△ 3日
-× 5日`;
-    const url = `https://social-plugins.line.me/lineit/share?text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank");
-  };
-  const days = Array.from({ length: 30 }, (_, i) => i + 1);
+# takemototosou 出勤日管理アプリ
 
-  const sample: Record<number, { mark: string; site: string; price: string }> = {
-    1: { mark: "○", site: "博多駅", price: "22000" },
-    2: { mark: "○", site: "博多駅", price: "22000" },
-    3: { mark: "△", site: "天神ビル", price: "18000" },
-    4: { mark: "×", site: "休み", price: "0" },
-    5: { mark: "○", site: "天神ビル", price: "25000" },
-  };
+`index.html` はインストール不要で開ける出勤日管理アプリです。
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-4 flex justify-center">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-4">
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          出勤カレンダー
-        </h1>
+- 月移動
+- 締め日の月別設定
+- 現場名、勤務、日当、インボイス有無の入力
+- 前月締め日翌日から当月締め日までの現場別集計
+- LINEで月の集計を共有
 
-        <div className="grid grid-cols-7 gap-2 mb-6">
-          {days.map((day) => (
-            <button
-              key={day}
-              className="aspect-square rounded-2xl border bg-gray-50 hover:bg-gray-100 flex flex-col items-center justify-center text-sm p-1"
-            >
-              <span className="font-semibold">{day}</span>
-              <span className="text-lg">{sample[day]?.mark || "-"}</span>
-              <span className="text-[10px] text-gray-500 truncate w-full text-center">
-                {sample[day]?.site || ""}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="bg-gray-50 rounded-2xl p-4 space-y-4 border">
-          <div>
-            <p className="text-sm text-gray-500">日付</p>
-            <p className="text-lg font-bold">4月6日</p>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500 mb-1">現場名</p>
-            <select className="w-full rounded-xl border p-3 bg-white">
-              <option>博多駅ビル</option>
-              <option>天神マンション</option>
-              <option>中央区テナント</option>
-            </select>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500 mb-2">勤務</p>
-            <div className="flex gap-2">
-              <button className="flex-1 rounded-2xl bg-green-500 text-white py-4 text-2xl font-bold">
-                ○
-              </button>
-              <button className="flex-1 rounded-2xl bg-yellow-400 text-white py-4 text-2xl font-bold">
-                △
-              </button>
-              <button className="flex-1 rounded-2xl bg-red-500 text-white py-4 text-2xl font-bold">
-                ×
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm text-gray-500 mb-1">日当</p>
-            <select className="w-full rounded-xl border p-3 bg-white">
-              <option>18000円</option>
-              <option>20000円</option>
-              <option>22000円</option>
-              <option>25000円</option>
-            </select>
-          </div>
-
-          <button className="w-full bg-black text-white rounded-2xl py-4 text-lg font-bold">
-            保存
-          </button>
-        </div>
-
-        <div className="mt-6 bg-blue-50 rounded-2xl p-4">
-          <h2 className="font-bold mb-2">今月の集計</h2>
-          <div className="flex justify-between text-sm">
-            <span>○ 18日</span>
-            <span>△ 3日</span>
-            <span>× 5日</span>
-          </div>
-        </div>
-
-        <button
-          onClick={shareToLine}
-          className="mt-4 w-full bg-green-500 text-white rounded-2xl py-4 text-lg font-bold"
-        >
-          LINEで共有
-        </button>
-      </div>
-    </div>
-  );
-}
+React プロジェクトに組み込む場合は `App.tsx` を使ってください。
