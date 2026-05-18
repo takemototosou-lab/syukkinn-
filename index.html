@@ -459,6 +459,11 @@
         margin-bottom: 24px;
       }
 
+      .invoice-render h2 {
+        margin: 22px 0 6px;
+        font-size: 18px;
+      }
+
       .invoice-render table {
         width: 100%;
         border-collapse: collapse;
@@ -727,6 +732,8 @@
         price: 18000,
         invoice: true,
       };
+      const normalFullPrice = 18000;
+      const normalHalfPrice = 9000;
 
       function readStorage(key, fallback) {
         try {
@@ -900,7 +907,7 @@
 
       function getGroups() {
         const map = {};
-        Object.values(workData).forEach((data) => {
+        Object.entries(workData).forEach(([day, data]) => {
           if (!data.site || data.mark === "×") return;
           const key = `${data.site}-${data.invoice ? "invoice" : "no-invoice"}`;
           if (!map[key]) {
@@ -910,14 +917,32 @@
               invoice: data.invoice,
               fullDays: 0,
               halfDays: 0,
+              normalFullDays: 0,
+              normalHalfDays: 0,
+              variableItems: [],
               total: 0,
             };
           }
 
           const price = Number(data.price || 0);
-          map[key].total += data.mark === "△" ? price / 2 : price;
+          const amount = data.mark === "△" ? price / 2 : price;
+          map[key].total += amount;
           if (data.mark === "○") map[key].fullDays += 1;
           if (data.mark === "△") map[key].halfDays += 1;
+
+          const isNormalFull = data.mark === "○" && amount === normalFullPrice;
+          const isNormalHalf = data.mark === "△" && amount === normalHalfPrice;
+          if (isNormalFull) {
+            map[key].normalFullDays += 1;
+          } else if (isNormalHalf) {
+            map[key].normalHalfDays += 1;
+          } else {
+            map[key].variableItems.push({
+              day: Number(day),
+              mark: data.mark,
+              amount,
+            });
+          }
         });
 
         return Object.values(map).map((group) => {
@@ -928,7 +953,6 @@
             tax,
             grand: group.total + tax,
             workDays,
-            unitPrice: workDays > 0 ? Math.round(group.total / workDays) : 0,
           };
         });
       }
@@ -969,6 +993,49 @@
         return escapeHtml(value || "").replaceAll("\n", "<br>");
       }
 
+      function buildNormalWorkRows(group) {
+        const normalFullTotal = group.normalFullDays * normalFullPrice;
+        const normalHalfTotal = group.normalHalfDays * normalHalfPrice;
+        return `
+          <h2>通常作業</h2>
+          <table>
+            <tbody>
+              <tr>
+                <th>○ ${group.normalFullDays}日 × ${money(normalFullPrice)}</th>
+                <td>${money(normalFullTotal)}</td>
+              </tr>
+              <tr>
+                <th>△ ${group.normalHalfDays}日 × ${money(normalHalfPrice)}</th>
+                <td>${money(normalHalfTotal)}</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+      }
+
+      function buildVariableWorkRows(group) {
+        if (!group.variableItems.length) return "";
+        const rows = group.variableItems
+          .sort((a, b) => a.day - b.day)
+          .map(
+            (item) => `
+              <tr>
+                <th>${month}/${item.day}</th>
+                <td>${item.mark}</td>
+                <td>${money(item.amount)}</td>
+              </tr>
+            `,
+          )
+          .join("");
+
+        return `
+          <h2>変動単価</h2>
+          <table>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+
       function buildInvoiceElement(group, customerName) {
         const invoice = document.createElement("div");
         invoice.className = "invoice-render";
@@ -991,12 +1058,13 @@
               <tr><th>○日数</th><td>${group.fullDays}日</td></tr>
               <tr><th>△日数</th><td>${group.halfDays}日</td></tr>
               <tr><th>日数換算</th><td>${group.workDays}日</td></tr>
-              <tr><th>単価</th><td>${money(group.unitPrice)}</td></tr>
               <tr><th>税抜金額</th><td>${money(group.total)}</td></tr>
               <tr><th>消費税</th><td>${money(group.tax)}</td></tr>
               <tr><th>請求金額（税込）</th><td>${money(group.grand)}</td></tr>
             </tbody>
           </table>
+          ${buildNormalWorkRows(group)}
+          ${buildVariableWorkRows(group)}
           <table>
             <tbody>
               <tr><th>自社名</th><td>${escapeHtml(companyInfo.name || "")}</td></tr>
