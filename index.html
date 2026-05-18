@@ -996,19 +996,30 @@
       function buildNormalWorkRows(group) {
         const normalFullTotal = group.normalFullDays * normalFullPrice;
         const normalHalfTotal = group.normalHalfDays * normalHalfPrice;
-        return `
-          <h2>通常作業</h2>
-          <table>
-            <tbody>
+        const rows = [];
+        if (group.normalFullDays > 0) {
+          rows.push(`
               <tr>
                 <th>○ ${group.normalFullDays}日 × ${money(normalFullPrice)}</th>
                 <td>${money(normalFullTotal)}</td>
               </tr>
+          `);
+        }
+        if (group.normalHalfDays > 0) {
+          rows.push(`
               <tr>
                 <th>△ ${group.normalHalfDays}日 × ${money(normalHalfPrice)}</th>
                 <td>${money(normalHalfTotal)}</td>
               </tr>
-            </tbody>
+          `);
+        }
+
+        if (!rows.length) return "";
+
+        return `
+          <h2>通常作業</h2>
+          <table>
+            <tbody>${rows.join("")}</tbody>
           </table>
         `;
       }
@@ -1021,7 +1032,7 @@
             (item) => `
               <tr>
                 <th>${month}/${item.day}</th>
-                <td>${item.mark}</td>
+                <td>${item.mark} 1日 × ${money(item.amount)}</td>
                 <td>${money(item.amount)}</td>
               </tr>
             `,
