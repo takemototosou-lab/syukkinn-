@@ -984,7 +984,7 @@
               <p><strong>対象期間</strong> ${getPeriodLabel()}</p>
             </div>
           </div>
-          <p class="amount">請求額 ${money(group.grand)}</p>
+          <p class="amount">請求金額（税込） ${money(group.grand)}</p>
           <table>
             <tbody>
               <tr><th>現場名</th><td>${escapeHtml(group.site)}</td></tr>
@@ -994,7 +994,7 @@
               <tr><th>単価</th><td>${money(group.unitPrice)}</td></tr>
               <tr><th>税抜金額</th><td>${money(group.total)}</td></tr>
               <tr><th>消費税</th><td>${money(group.tax)}</td></tr>
-              <tr><th>請求額</th><td>${money(group.grand)}</td></tr>
+              <tr><th>請求金額（税込）</th><td>${money(group.grand)}</td></tr>
             </tbody>
           </table>
           <table>
