@@ -925,7 +925,7 @@
           }
 
           const price = Number(data.price || 0);
-          const amount = data.mark === "△" ? price / 2 : price;
+          const amount = price;
           map[key].total += amount;
           if (data.mark === "○") map[key].fullDays += 1;
           if (data.mark === "△") map[key].halfDays += 1;
